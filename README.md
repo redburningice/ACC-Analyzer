@@ -1,1 +1,1 @@
-# MotecAnalyzer
+# GoogleSheetsAnalyzer
