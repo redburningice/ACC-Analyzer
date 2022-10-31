@@ -1,0 +1,12 @@
+name: "ACC-Analyzer"
+output_dir: "docs"
+navbar:
+    title: "ACC-Analyzer"
+    left:
+    - text: "Home"
+        href: index.html
+    -text: "Speed and Distance"
+        href: speed-and-distance.html
+output:
+    html_document:
+        theme: cosmo
