@@ -106,7 +106,7 @@ ggplot(motec_data_n, aes(`Understeer Angle [°] Avg`, `Lap Time ` , color = `Dri
 ggplot(motec_data_n, aes(`Lap # `, `Steerangle abs [°] Avg`, color = `Driver/Setup `))+
   geom_point()+
   geom_smooth(se = FALSE, method = lm)+
-  labs(x = "Lap Number", y="Steerangle abs [?] Avg")+
+  labs(x = "Lap Number", y="Steerangle abs [?] Avg", title = "Average Steering Angle over a full stint")+
   ylim(15, 35)+
   theme_bw()
 

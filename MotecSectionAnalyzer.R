@@ -10,7 +10,7 @@ rm(list = ls())
 
 #import standard packages
 pacman::p_load(Hmisc, plyr, pacman, ggpubr, gridExtra, tidyquant, magrittr, dplyr, GGally, ggplot2, ggthemes, ggvis, 
-               httr, lubridate, plotly, rio, markdown, shiny, stringr, tidyr, tidyverse, zoo)
+               httr, lubridate, plotly, rio, markdown, shiny, stringr, tidyr, tidyverse, zoo, ggforce)
 
 # Import CSV
 # motec_data <- import("D:/Downloads/Channel Report3 - Laps.csv", header = FALSE)
