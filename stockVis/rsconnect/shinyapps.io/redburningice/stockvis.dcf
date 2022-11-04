@@ -1,0 +1,11 @@
+name: stockvis
+title:
+username:
+account: redburningice
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7491699
+bundleId: 6464971
+url: https://redburningice.shinyapps.io/stockvis/
+when: 1667342999.38319
+lastSyncTime: 1667342999.3832
