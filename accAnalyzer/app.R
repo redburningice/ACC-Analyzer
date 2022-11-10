@@ -1,5 +1,6 @@
-pacman::p_load(shinydashboard, googlesheets4, shinythemes, ggplot2, highcharter, shiny, DT, tidyr)
+pacman::p_load(shinydashboard, bslib, googlesheets4, shinythemes, ggplot2, highcharter, shiny, DT, tidyr, dplyr)
 source("GoogleSheetsAnalyzer.R")
+defaultUrl <- "https://docs.google.com/spreadsheets/d/1XqUbDBPDTwRxQYsmTz2R0g07LAD0iQtyB50LQYl-vHU/edit#gid=1840826699"
 
 ui <- dashboardPage(
   title = "NoP - Not only Plots",
@@ -11,10 +12,11 @@ ui <- dashboardPage(
       menuItem("Imports", tabName = "imports", selected = F),
       menuItem("Google Sheets Analyzer",
         tabName = "google-sheets-analyzer",
+        menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = T),
         menuSubItem("Tyres", tabName = "subtab-tyres"),
         menuSubItem("Drive Time", tabName = "subtab-drivetime"),
         menuSubItem("Fuel", tabName = "subtab-fuel"),
-        menuSubItem("Experimental", tabName = "experimental", selected = T)
+        menuSubItem("Experimental", tabName = "experimental", selected = F)
       ),
       menuItem("Motec Lap History Analyzer",
         tabName = "motec-lap-analyzer",
@@ -37,8 +39,23 @@ ui <- dashboardPage(
         fluidRow(
           column(
             width = 12,
-            textInput(inputId = "googleSheetsUrl", label = "Enter the Google Sheets URL:", value = "https://docs.google.com/spreadsheets/d/1ysa7HFW10e7g-7rtw3qsXWrMpoMSRQ34lW_PsJAvAbw/edit#gid=30962297"),
+            textInput(inputId = "googleSheetsUrl", label = "Enter the Google Sheets URL:", value = defaultUrl),
           )
+        )
+      ),
+      tabItem(
+        tabName = "subtab-laptimes",
+        fluidRow(
+          box(
+            width = 12,
+            h2("Stint Overview"),
+            plotOutput("subtab_laptimes_boxplot"),
+            #sliderInput("laptime_range", label = "Upper Range", min = 0.5, max = 1, step = 0.01, value = 0.8)
+          )
+        ),
+        br(),
+        fluidRow(
+          box(DT::dataTableOutput("tableGoogle"), width = 12)
         )
       ),
       tabItem(
@@ -50,24 +67,26 @@ ui <- dashboardPage(
         plotOutput("plotGoogle"),
         br(), br(),
         fluidRow(
-            box(DT::dataTableOutput("tableGoogle"), width = 12)
-        )
-        
-        
+          # box(DT::dataTableOutput("tableGoogle"), width = 12)
+        ),
+        p("Fabs was here"),
+        br(), br(), br(), br(), br(), br(),
+        p("All the time you have to leave a few paragraphs of space - Fernando Alonso - book author")
       )
     )
   )
 )
 
 server <- function(input, output) {
-  sheetData <- reactive(read_googlesheet(input$googleSheetsUrl))
+  lap_data <- reactive(read_googlesheet(input$googleSheetsUrl, "lap_data"))
+  stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
+  # lap_data_X_stint_overview <-
 
-  output$plotGoogle <- renderPlot(google_plot(sheetData()))
-  output$textGoogle <- renderText({
-    "Hello Fabs"
-  })
+  output$plotGoogle <- renderPlot(google_plot(lap_data()))
   data(iris)
-  output$tableGoogle <- DT::renderDataTable(sheetData(), options = list(scrollX = TRUE))
+  output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
+  output$subtab_laptimes_boxplot <- renderPlot(laptimes_stintoverview(lap_data()))
+  output$subtab_laptimes_table <- DT::renderDataTable(stint_overview(), options = list(scrollX = TRUE))
 }
 
 shinyApp(ui, server)
