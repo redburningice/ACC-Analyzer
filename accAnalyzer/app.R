@@ -9,11 +9,11 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = "sidebar",
-      menuItem("Imports", tabName = "imports", selected = F),
+      menuItem("Imports", tabName = "imports"),
       menuItem("Google Sheets Analyzer",
         tabName = "google-sheets-analyzer",
-        menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = T),
-        menuSubItem("Tyres", tabName = "subtab-tyres"),
+        menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = F),
+        menuSubItem("Tyres and Brakes", tabName = "subtab-tyres", selected = T),
         menuSubItem("Drive Time", tabName = "subtab-drivetime"),
         menuSubItem("Fuel", tabName = "subtab-fuel"),
         menuSubItem("Experimental", tabName = "experimental", selected = F)
@@ -46,11 +46,10 @@ ui <- dashboardPage(
       tabItem(
         tabName = "subtab-laptimes",
         fluidRow(
-          box(
-            width = 12,
-            h2("Stint Overview"),
-            plotOutput("subtab_laptimes_boxplot"),
-            #sliderInput("laptime_range", label = "Upper Range", min = 0.5, max = 1, step = 0.01, value = 0.8)
+          tabBox(
+            id = "tabset1", width = 12,
+            tabPanel("Boxplot", plotOutput("subtab_laptimes_boxplot")),
+            tabPanel("Line Chart", plotOutput("subtab_laptimes_linechart"))
           )
         ),
         br(),
@@ -59,7 +58,28 @@ ui <- dashboardPage(
         )
       ),
       tabItem(
-        tabName = "subtab-tyres"
+        tabName = "subtab-tyres",
+        fluidRow(
+          tabBox(
+            id = "tabset2", width = 12,
+            tabPanel(
+              "Pressure",
+              sliderInput("subtab_tyres_avg_pres_range", label = "Pressure Range [PSI]", min = 20, max = 40, value = c(27, 28.5), step = 0.5, width = "50%"),
+              plotOutput("subtab_tyres_avg_pres_boxplot")
+              # ,plotOutput("subtab_tyres_avg_pres_linechart")
+            ),
+            tabPanel(
+              "Temperatures",
+              sliderInput("subtab_tyres_avg_temp_range", label = "Temperature Range [°C]", min = 40, max = 120, value = c(80, 100), step = 5, width = "50%"),
+              plotOutput("subtab_tyres_avg_temp_boxplot")
+            ),
+            tabPanel(
+              "Brakes",
+              sliderInput("subtab_tyres_avg_braketemp_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
+              plotOutput("subtab_tyres_avg_braketemp_boxplot")
+            )
+          )
+        )
       ),
       tabItem(
         tabName = "experimental",
@@ -80,13 +100,22 @@ ui <- dashboardPage(
 server <- function(input, output) {
   lap_data <- reactive(read_googlesheet(input$googleSheetsUrl, "lap_data"))
   stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
-  # lap_data_X_stint_overview <-
 
   output$plotGoogle <- renderPlot(google_plot(lap_data()))
-  data(iris)
+
+  # Laptimes
   output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
-  output$subtab_laptimes_boxplot <- renderPlot(laptimes_stintoverview(lap_data()))
+  output$subtab_laptimes_boxplot <- renderPlot(stint_overview_boxplot(lap_data()))
   output$subtab_laptimes_table <- DT::renderDataTable(stint_overview(), options = list(scrollX = TRUE))
+  output$subtab_laptimes_linechart <- renderPlot(stint_overview_linechart(lap_data()))
+
+  # Tyres and Brakes
+  output$subtab_tyres_avg_pres_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
+  output$subtab_tyres_avg_pres_linechart <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_pres_range, "temperature"))
+
+  output$subtab_tyres_avg_temp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
+
+  output$subtab_tyres_avg_braketemp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_braketemp_range, "braketemps"))
 }
 
 shinyApp(ui, server)

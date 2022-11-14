@@ -4,7 +4,7 @@
 # Press CTRL+Shift+Enter to execute the whole script
 
 # import standard packages
-pacman::p_load(googlesheets4, ggplot2, tidyr, dplyr, tibble)
+pacman::p_load(googlesheets4, ggplot2, tidyr, dplyr, tibble, data.table)
 
 read_googlesheet <- function(url, sheetname) {
   gs4_deauth()
@@ -26,18 +26,24 @@ read_googlesheet <- function(url, sheetname) {
     }
 
     data <- add_column(data, Stint = NA, .before = "Lap")
+    data <- add_column(data, Stintlap = NA, .after = "Stint")
 
     for (i in 1:nrow(data)) {
+        
+        #add Stint and Stintlap columns
       if (i == 1) {
         data$Stint[i] <- 1
+        data$Stintlap[i] <- 1
         next
       }
-
       next_stint <- 0
       if (data$`Out lap?`[i] == "Yes") {
         next_stint <- 1
+        data$`Stintlap`[i] <- 1
+      } else {
+          data$Stintlap[i] <- data$Stintlap[i - 1] + 1
       }
-
+      
       data$Stint[i] <- data$Stint[i - 1] + next_stint
     }
   }
@@ -64,16 +70,7 @@ google_plot <- function(data) {
     scale_x_discrete()
 }
 
-# laptimes_stintoverview <- function(data, range) {
-#     ggplot(data, aes(`Driver`, `Lap time`, fill = `Driver`)) +
-#         geom_boxplot(varwidth = TRUE) +
-#         stat_summary(aes(label=round(..y..,2)), fun=median, geom="label", fill = "white")+
-#         #scale_y_discrete()+
-#         theme_bw()
-#
-# }
-
-laptimes_stintoverview <- function(data) {
+stint_overview_boxplot <- function(data) {
     laptimes_sorted_filtered <- data %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>% pull(`Lap time`) %>% sort()
     ggplot(data, aes(as.factor(`Stint`), `Lap time`, fill = `Driver`)) +
         geom_boxplot(show.legend = TRUE) +
@@ -84,6 +81,70 @@ laptimes_stintoverview <- function(data) {
                 laptimes_sorted_filtered[length(laptimes_sorted_filtered)*0.98]
             )
         )+
-        labs(title = "Stint Overview", x = "Stint")+
+        labs(x = "Stint")+
         theme_bw()
 }
+
+stint_overview_linechart <- function(data) {
+    laptimes_sorted_filtered <- data %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>% pull(`Lap time`) %>% sort()
+    
+    data %>%
+        dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>%
+        ggplot(aes(`Stintlap`, `Lap time`, colour = `Driver`))+
+        geom_line(size = 1)+
+        coord_cartesian(
+            ylim = c(
+                min(data$`Lap time`),
+                laptimes_sorted_filtered[length(laptimes_sorted_filtered)*0.98]
+            )
+        )+
+        facet_grid(rows = vars(`Stint`), shrink = TRUE)+
+        #stat_summary(aes(label = "a", x = x, y = ..y..), geom = "label", fill = "white")+
+        labs(x = "Stint Lap")+
+        theme_bw()
+}
+
+tyres_boxplot <- function(data, range, variable) {
+    switch(
+        variable,
+        "pressure" = {
+            data %>% tidyr::pivot_longer(cols = `Avg tyre pressure FL`:`Avg tyre pressure RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
+                geom_boxplot()+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Stint", y = "Average Tyre Pressure [PSI]")+
+                stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()
+        },
+        "temperature" = {
+            data %>% tidyr::pivot_longer(cols = `Avg tyre temp FL`:`Avg tyre temp RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
+                geom_boxplot()+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Stint", y = "Average Tyre Temperature [°C]")+
+                stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()            
+        },
+        "braketemps" = {
+            data %>% tidyr::pivot_longer(cols = `Brake avg temp FL`:`Brake avg temp RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
+                geom_boxplot()+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Stint", y = "Average Brake Temperature [°C]")+
+                stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()            
+        }
+    ) 
+}
+
+
+
