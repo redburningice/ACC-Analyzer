@@ -16,6 +16,7 @@ ui <- dashboardPage(
         menuSubItem("Tyres and Brakes", tabName = "subtab-tyres", selected = T),
         menuSubItem("Drive Time", tabName = "subtab-drivetime"),
         menuSubItem("Fuel", tabName = "subtab-fuel"),
+        menuSubItem("Weather", tabName = "subtab-weather"),
         menuSubItem("Experimental", tabName = "experimental", selected = F)
       ),
       menuItem("Motec Lap History Analyzer",
@@ -65,18 +66,27 @@ ui <- dashboardPage(
             tabPanel(
               "Pressure",
               sliderInput("subtab_tyres_avg_pres_range", label = "Pressure Range [PSI]", min = 20, max = 40, value = c(27, 28.5), step = 0.5, width = "50%"),
-              plotOutput("subtab_tyres_avg_pres_boxplot")
-              # ,plotOutput("subtab_tyres_avg_pres_linechart")
+              plotOutput("subtab_tyres_avg_pres_boxplot"),
+              plotOutput("subtab_tyres_avg_pres_linechart")
             ),
             tabPanel(
               "Temperatures",
               sliderInput("subtab_tyres_avg_temp_range", label = "Temperature Range [°C]", min = 40, max = 120, value = c(80, 100), step = 5, width = "50%"),
-              plotOutput("subtab_tyres_avg_temp_boxplot")
+              plotOutput("subtab_tyres_avg_temp_boxplot"),
+              plotOutput("subtab_tyres_avg_temp_linechart")
             ),
             tabPanel(
-              "Brakes",
+              "Brake Temps",
               sliderInput("subtab_tyres_avg_braketemp_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
-              plotOutput("subtab_tyres_avg_braketemp_boxplot")
+              plotOutput("subtab_tyres_avg_braketemp_boxplot"),
+              plotOutput("subtab_tyres_avg_braketemp_linechart"),
+              plotOutput("subtab_tyres_avg_brakewear_linechart")
+            ),
+            tabPanel(
+              "Brake Wear",
+              sliderInput("subtab_brakewear_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
+              plotOutput("subtab_brakewear_boxplot"),
+              plotOutput("subtab_brakewear_linechart")
             )
           )
         )
@@ -111,11 +121,16 @@ server <- function(input, output) {
 
   # Tyres and Brakes
   output$subtab_tyres_avg_pres_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
-  output$subtab_tyres_avg_pres_linechart <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_pres_range, "temperature"))
+  output$subtab_tyres_avg_pres_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
 
   output$subtab_tyres_avg_temp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
+  output$subtab_tyres_avg_temp_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
 
   output$subtab_tyres_avg_braketemp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_braketemp_range, "braketemps"))
+  output$subtab_tyres_avg_braketemp_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_braketemp_range, "braketemps"))
+
+  output$subtab_brakewear_boxplot <- renderPlot(tyres_boxplot(lap_data(), NA, "brakewear"))
+  output$subtab_brakewear_linechart <- renderPlot(tyres_linechart(lap_data(), NA, "brakewear"))
 }
 
 shinyApp(ui, server)

@@ -142,6 +142,73 @@ tyres_boxplot <- function(data, range, variable) {
                 stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
                 facet_wrap(vars(`Tyre`))+
                 theme_bw()            
+        },
+        "brakewear" = {
+            data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
+                geom_boxplot()+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Stint", y = "Brake Pad Life [mm]")+
+                stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()            
+        }
+    ) 
+}
+
+tyres_linechart <- function(data, range, variable) {
+    pitlaps <- data %>% dplyr::filter(`In lap?` == "Yes") %>% pull(`Lap`)
+    switch(
+        variable,
+        "pressure" = {
+            data %>% tidyr::pivot_longer(cols = `Avg tyre pressure FL`:`Avg tyre pressure RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
+                geom_path(aes(group = 1))+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Laps", y = "Average Tyre Pressure [PSI]")+
+                geom_vline(xintercept = pitlaps)+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()
+        },
+        "temperature" = {
+            data %>% tidyr::pivot_longer(cols = `Avg tyre temp FL`:`Avg tyre temp RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
+                geom_path(aes(group = 1))+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Laps", y = "Average Tyre Temp [°C]")+
+                geom_vline(xintercept = pitlaps)+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()           
+        },
+        "braketemps" = {
+            data %>% tidyr::pivot_longer(cols = `Brake avg temp FL`:`Brake avg temp RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
+                geom_path(aes(group = 1))+
+                coord_cartesian(
+                    ylim = range
+                )+
+                labs(x = "Laps", y = "Average Brake Temperature [°C]")+
+                geom_vline(xintercept = pitlaps)+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()       
+        },
+        "brakewear" = {
+            data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value") %>%
+                ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
+                geom_path(aes(group = 1))+
+                coord_cartesian(
+                    ylim = c()
+                )+
+                labs(x = "Laps", y = "Brake Pad Life [mm]")+
+                geom_vline(xintercept = pitlaps)+
+                facet_wrap(vars(`Tyre`))+
+                theme_bw()       
         }
     ) 
 }
