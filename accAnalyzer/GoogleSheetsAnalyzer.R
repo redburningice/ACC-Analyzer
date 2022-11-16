@@ -147,9 +147,6 @@ tyres_boxplot <- function(data, range, variable) {
             data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value") %>%
                 ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
                 geom_boxplot()+
-                coord_cartesian(
-                    ylim = range
-                )+
                 labs(x = "Stint", y = "Brake Pad Life [mm]")+
                 stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
                 facet_wrap(vars(`Tyre`))+
@@ -199,12 +196,9 @@ tyres_linechart <- function(data, range, variable) {
                 theme_bw()       
         },
         "brakewear" = {
-            data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value") %>%
-                ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
+            data <- data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value")
+            data %>% ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
                 geom_path(aes(group = 1))+
-                coord_cartesian(
-                    ylim = c()
-                )+
                 labs(x = "Laps", y = "Brake Pad Life [mm]")+
                 geom_vline(xintercept = pitlaps)+
                 facet_wrap(vars(`Tyre`))+

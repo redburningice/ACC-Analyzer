@@ -17,6 +17,7 @@ ui <- dashboardPage(
         menuSubItem("Drive Time", tabName = "subtab-drivetime"),
         menuSubItem("Fuel", tabName = "subtab-fuel"),
         menuSubItem("Weather", tabName = "subtab-weather"),
+        menuSubItem("Pitstops", tabName = "subtab_pitstops"),
         menuSubItem("Experimental", tabName = "experimental", selected = F)
       ),
       menuItem("Motec Lap History Analyzer",
@@ -79,13 +80,13 @@ ui <- dashboardPage(
               "Brake Temps",
               sliderInput("subtab_tyres_avg_braketemp_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
               plotOutput("subtab_tyres_avg_braketemp_boxplot"),
-              plotOutput("subtab_tyres_avg_braketemp_linechart"),
-              plotOutput("subtab_tyres_avg_brakewear_linechart")
+              plotOutput("subtab_tyres_avg_braketemp_linechart")
             ),
             tabPanel(
               "Brake Wear",
               sliderInput("subtab_brakewear_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
               plotOutput("subtab_brakewear_boxplot"),
+              box(p("For the above plot change it, so that it only shows the prake wear for each lap")),
               plotOutput("subtab_brakewear_linechart")
             )
           )
