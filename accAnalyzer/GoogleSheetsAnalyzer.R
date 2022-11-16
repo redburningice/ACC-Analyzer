@@ -144,6 +144,7 @@ tyres_boxplot <- function(data, range, variable) {
                 theme_bw()            
         },
         "brakewear" = {
+            brakewear_per_lap <- diff(data$`Brake pad level FL`, differences = 1)*-1
             data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value") %>%
                 ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
                 geom_boxplot()+
