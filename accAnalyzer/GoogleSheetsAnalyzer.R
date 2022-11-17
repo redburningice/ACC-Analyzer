@@ -144,13 +144,21 @@ tyres_boxplot <- function(data, range, variable) {
                 theme_bw()            
         },
         "brakewear" = {
-            brakewear_per_lap <- diff(data$`Brake pad level FL`, differences = 1)*-1
+            brakewear_per_lap <- c(
+                `Brake pad level FL` = "FL",
+                `Brake pad level FL` = "FR",
+                `Brake pad level FL` = "RL",
+                `Brake pad level FL` = "RR"
+            )
             data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value") %>%
                 ggplot(aes(as.factor(`Stint`), `value`, fill = `Driver`))+
-                geom_boxplot()+
-                labs(x = "Stint", y = "Brake Pad Life [mm]")+
-                stat_summary(aes(label = round(..y.., 2)), fun = median, geom = "label", fill = "white")+
+                labs(x = "Stint", y = "Brake Pad Wear per Lap [mm]")+
+                stat_summary(
+                    aes(label = round(..y.., 4)), 
+                    fun = brakewear_fun, 
+                    geom = "label")+
                 facet_wrap(vars(`Tyre`))+
+                facet_wrap(vars(`Tyre`), labeller = as_labeller(brakewear_per_lap))+
                 theme_bw()            
         }
     ) 
@@ -200,13 +208,26 @@ tyres_linechart <- function(data, range, variable) {
             data <- data %>% tidyr::pivot_longer(cols = `Brake pad level FL`:`Brake pad level RR`, names_to = "Tyre", values_to = "value")
             data %>% ggplot(aes(x = `Lap`,y = `value`, colour = `Driver`))+
                 geom_path(aes(group = 1))+
-                labs(x = "Laps", y = "Brake Pad Life [mm]")+
+                labs(x = "Laps", y = "Brake Pad Level [mm]")+
                 geom_vline(xintercept = pitlaps)+
                 facet_wrap(vars(`Tyre`))+
-                theme_bw()       
+                theme_bw()      
         }
     ) 
 }
 
+brakewear_fun <- function(y) {
+    mean(diff(y, differences = 1)*-1)
+}
+
+weather_linechart <- function(data) {
+    pitlaps <- data %>% dplyr::filter(`In lap?` == "Yes") %>% pull(`Lap`)
+    ggplot(data, aes(x = `Lap`))+
+        geom_line(aes(y = `Air temp`), colour = "blue", size = 1)+
+        geom_line(aes(y = `Track temp`), colour = "red", size = 1)+
+        geom_vline(xintercept = pitlaps)+
+        labs(x = "Laps", y = "Temperature [°C]")+
+        theme_bw()
+}
 
 

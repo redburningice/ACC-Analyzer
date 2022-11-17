@@ -16,7 +16,7 @@ ui <- dashboardPage(
         menuSubItem("Tyres and Brakes", tabName = "subtab-tyres", selected = T),
         menuSubItem("Drive Time", tabName = "subtab-drivetime"),
         menuSubItem("Fuel", tabName = "subtab-fuel"),
-        menuSubItem("Weather", tabName = "subtab-weather"),
+        menuSubItem("Weather", tabName = "subtab_weather"),
         menuSubItem("Pitstops", tabName = "subtab_pitstops"),
         menuSubItem("Experimental", tabName = "experimental", selected = F)
       ),
@@ -86,11 +86,15 @@ ui <- dashboardPage(
               "Brake Wear",
               sliderInput("subtab_brakewear_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
               plotOutput("subtab_brakewear_boxplot"),
-              box(p("For the above plot change it, so that it only shows the prake wear for each lap")),
               plotOutput("subtab_brakewear_linechart")
             )
           )
         )
+      ),
+      tabItem(
+          tabName = "subtab_weather",
+          h2("Temperature History"),
+          fluidRow(plotOutput("subtab_weather_linechart"))
       ),
       tabItem(
         tabName = "experimental",
@@ -132,6 +136,9 @@ server <- function(input, output) {
 
   output$subtab_brakewear_boxplot <- renderPlot(tyres_boxplot(lap_data(), NA, "brakewear"))
   output$subtab_brakewear_linechart <- renderPlot(tyres_linechart(lap_data(), NA, "brakewear"))
+  
+  #Weather
+  output$subtab_weather_linechart <- renderPlot(weather_linechart(lap_data()))
 }
 
 shinyApp(ui, server)
