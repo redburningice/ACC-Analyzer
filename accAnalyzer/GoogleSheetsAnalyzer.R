@@ -230,4 +230,26 @@ weather_linechart <- function(data) {
         theme_bw()
 }
 
+fuel_boxplot <- function(data) {
+    data %>% dplyr::filter(`Out lap?` == "No", `In lap?` == "No") %>%
+        ggplot(aes(x = as.factor(`Stint`), y = `Fuel consumption avg`, fill = `Driver`))+
+        geom_boxplot()+
+        labs(x = "Stint", y = "Avg Fuel Consumption per Lap [l/lap]")+
+        stat_summary(
+            aes(label = round(..y.., 2)), 
+            fun = median, 
+            geom = "label", fill = "white")+
+        theme_bw()
+}
+
+fuel_linechart <- function(data) {
+    pitlaps <- data %>% dplyr::filter(`In lap?` == "Yes") %>% pull(`Lap`)
+    data <- data %>% dplyr::filter(`Out lap?` == "No", `In lap?` == "No")
+    ggplot(data, aes(x = `Lap`))+
+        geom_path(aes(y = `Fuel consumption avg`, group = 1, colour = `Driver`), size = 1)+
+        geom_vline(xintercept = pitlaps)+
+        labs(x = "Laps", y = "Avg Fuel Consumption [l]")+
+        theme_bw()
+}
+
 

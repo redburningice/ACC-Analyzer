@@ -14,18 +14,17 @@ ui <- dashboardPage(
         tabName = "google-sheets-analyzer",
         menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = F),
         menuSubItem("Tyres and Brakes", tabName = "subtab-tyres", selected = T),
-        menuSubItem("Drive Time", tabName = "subtab-drivetime"),
-        menuSubItem("Fuel", tabName = "subtab-fuel"),
-        menuSubItem("Weather", tabName = "subtab_weather"),
-        menuSubItem("Pitstops", tabName = "subtab_pitstops"),
-        menuSubItem("Experimental", tabName = "experimental", selected = F)
+        menuSubItem("Fuel", tabName = "subtab_fuel"),
+        menuSubItem("Pitstops [not implemented]", tabName = "subtab_pitstops"),
+        menuSubItem("Drive Time [not implemented]", tabName = "subtab_drivetime"),
+        menuSubItem("Weather", tabName = "subtab_weather")
       ),
-      menuItem("Motec Lap History Analyzer",
+      menuItem("Motec Lap History Analyzer [not implemented]",
         tabName = "motec-lap-analyzer",
         menuSubItem("Lap Time Overview", tabName = "motec-lap-laptime"),
         menuSubItem("Understeer Analysis", tabName = "motec-lap-understeer")
       ),
-      menuItem("Motec Section History Analyzer",
+      menuItem("Motec Section History Analyzer [not implemented]",
         tabName = "motec-section-analyzer",
         menuSubItem("Braking Analysis", tabName = "motec-section-braking"),
         menuSubItem("Detailled Section Analysis", tabName = "motec-section-braking-detailled"),
@@ -92,21 +91,14 @@ ui <- dashboardPage(
         )
       ),
       tabItem(
+        tabName = "subtab_fuel",
+        plotOutput("subtab_fuel_boxplot"),
+        plotOutput("subtab_fuel_linechart")
+      ),
+      tabItem(
           tabName = "subtab_weather",
           h2("Temperature History"),
           fluidRow(plotOutput("subtab_weather_linechart"))
-      ),
-      tabItem(
-        tabName = "experimental",
-        p("This is experimental"),
-        plotOutput("plotGoogle"),
-        br(), br(),
-        fluidRow(
-          # box(DT::dataTableOutput("tableGoogle"), width = 12)
-        ),
-        p("Fabs was here"),
-        br(), br(), br(), br(), br(), br(),
-        p("All the time you have to leave a few paragraphs of space - Fernando Alonso - book author")
       )
     )
   )
@@ -115,8 +107,7 @@ ui <- dashboardPage(
 server <- function(input, output) {
   lap_data <- reactive(read_googlesheet(input$googleSheetsUrl, "lap_data"))
   stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
-
-  output$plotGoogle <- renderPlot(google_plot(lap_data()))
+  event_info <- reactive(read_googlesheet(input$googleSheetsUrl, "Event info"))
 
   # Laptimes
   output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
@@ -137,8 +128,16 @@ server <- function(input, output) {
   output$subtab_brakewear_boxplot <- renderPlot(tyres_boxplot(lap_data(), NA, "brakewear"))
   output$subtab_brakewear_linechart <- renderPlot(tyres_linechart(lap_data(), NA, "brakewear"))
   
-  #Weather
+  # Drive Time
+  
+  # Fuel
+  output$subtab_fuel_boxplot <- renderPlot(fuel_boxplot(lap_data()))
+  output$subtab_fuel_linechart <- renderPlot(fuel_linechart(lap_data()))
+  
+  # Weather
   output$subtab_weather_linechart <- renderPlot(weather_linechart(lap_data()))
+  
+  # Pitstops
 }
 
 shinyApp(ui, server)
