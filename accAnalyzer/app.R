@@ -138,6 +138,7 @@ server <- function(input, output) {
   output$subtab_weather_linechart <- renderPlot(weather_linechart(lap_data()))
   
   # Pitstops
+  
 }
 
 shinyApp(ui, server)
