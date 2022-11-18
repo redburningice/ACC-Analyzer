@@ -30,15 +30,14 @@ boxplot <- function(data, x, y, yRange = NULL, hasLabel = FALSE, decimalPlaces =
     return(plot)
 }
 
-boxplot_facet2x2 <- function(data, x, variable, yRange = NULL, hasLabel = FALSE, decimalPlaces = 2) {
-    column1 <- paste(variable, "FL", sep = " ")
-    column2 <- paste(variable, "FR", sep = " ")
-    column3 <- paste(variable, "RL", sep = " ")
-    column4 <- paste(variable, "RR", sep = " ")
+boxplot_facet <- function(data, x, variable, yRange = NULL, freeYAxis, hasLabel = FALSE, decimalPlaces = 2, individualsList) {
+    first_column <- paste(variable, individualsList[1], sep = " ")
+    last_column <- paste(variable, individualsList[length(individualsList)], sep = " ")
     
-    data <- data %>% tidyr::pivot_longer(cols = all_of(column1):all_of(column4), names_to = "Tyre", values_to = variable)
+    data <- data %>% tidyr::pivot_longer(cols = all_of(first_column):all_of(last_column), names_to = "Tyre", values_to = variable)
     
-    boxplot(data, x, variable, yRange, hasLabel, decimalPlaces)
+    boxplot(data, x, y = variable, yRange = yRange, hasLabel = hasLabel, decimalPlaces = decimalPlaces)+
+        facet_wrap(vars(`Tyre`))
 }
 
 

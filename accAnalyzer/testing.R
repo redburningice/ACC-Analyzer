@@ -21,5 +21,6 @@ source("accAnalyzer/GenericPlots.R")
 # boxplot(data, "Stint", "Position overall", hasLabel = FALSE, decimalPlaces = 1, yRange = c(5,17))
 
 source("accAnalyzer/GenericPlots.R")
-boxplot_facet2x2(data, "Stint", "Max tyre temp", hasLabel = TRUE)
-
+boxplot_facet(data, "Stint", "Brake avg temp", hasLabel = TRUE, individualsList = c("FL", "FR", "RL", "RR"))
+boxplot_facet(data, "Stint", "Sector", hasLabel = TRUE, individualsList = c("1", "2", "3"), yRange = c(15, 60))
+boxplot(data, "Stint", "Sector 2", hasLabel = TRUE, yRange = c(43,44.5))
