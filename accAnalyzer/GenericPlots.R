@@ -52,29 +52,35 @@ facet_pivot <- function(data, variable) {
     data %>% tidyr::pivot_longer(cols = starts_with(variable), names_to = "VariableName", values_to = variable)
 }
 
-facet <- function(data, variable, freeYAxis = FALSE, nColumns = 2) {
+facet <- function(data, variable, freeYAxis = FALSE, nColumns = 2, stripPos = "top") {
     if (freeYAxis == TRUE) scaleOption <- "free_y" else scaleOption <- "fixed"
     
     if ("VariableName" %in% colnames(data)) {
-        facet_wrap(vars(`VariableName`), scales = scaleOption, ncol = nColumns)
+        facet_wrap(vars(`VariableName`), scales = scaleOption, ncol = nColumns, strip.position = stripPos)
     } else {
-        facet_wrap(vars(.data[[variable]], scales = scaleOption, ncol = nColumns))
+        facet_wrap(vars(.data[[variable]]), scales = scaleOption, ncol = nColumns, strip.position = stripPos)
     }
     
 }
 
-boxplot_facet <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 2, nColumns = 2) {
-    data <- facet_pivot(data, variable)
+boxplot_facet <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 2, nColumns = 2, stripPos = "top") {
+    if (is.null(y)) {
+        data <- facet_pivot(data, variable)
+        y <- variable
+    }
     
     boxplot(data, x, y, yRange = yRange, hasLabel = hasLabel, decimalPlaces = decimalPlaces)+
-        facet(data, variable, freeYAxis, nColumns)
+        facet(data, variable, freeYAxis, nColumns, stripPos)
 }
 
-linegraph_facet <- function(data, x, y, variable, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, freeYAxis = FALSE, nColumns = 2) {
-    if (is.null(y)) data <- facet_pivot(data, variable)
+linegraph_facet <- function(data, x, y, variable, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, freeYAxis = FALSE, nColumns = 2, stripPos = "top") {
+    if (is.null(y)) {
+        data <- facet_pivot(data, variable)
+        y <- variable
+    }
     
     linegraph(data, x, y, yRange, hasStintSeperator, colorVariable)+
-        facet(data, variable, freeYAxis, nColumns)
+        facet(data, variable, freeYAxis, nColumns, stripPos = stripPos)
 }
 
 

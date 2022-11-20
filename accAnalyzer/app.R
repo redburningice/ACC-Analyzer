@@ -110,18 +110,17 @@ server <- function(input, output) {
   stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
   event_info <- reactive(read_googlesheet(input$googleSheetsUrl, "Event info"))
   laptimes_sorted_filtered <- reactive(lap_data() %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>% pull(`Lap time`) %>% sort())
+  laptimes_range <- reactive(c(laptimes_sorted_filtered()[1],laptimes_sorted_filtered()[length(laptimes_sorted_filtered())*0.98]))
 
   # Laptimes
   output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
-  output$subtab_laptimes_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Lap time", hasLabel = TRUE, yRange = c(laptimes_sorted_filtered()[1],laptimes_sorted_filtered()[length(laptimes_sorted_filtered())*0.98])))
+  output$subtab_laptimes_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Lap time", hasLabel = TRUE, yRange = laptimes_range()))
   output$subtab_laptimes_table <- DT::renderDataTable(stint_overview(), options = list(scrollX = TRUE))
-  #output$subtab_laptimes_linechart <- renderPlot(stint_overview_linechart(lap_data()))
-  #output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stint lap", y = "Lap time", variable = "Stint"))
-  output$subtab_laptimes_linechart <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Sector"))
-  
+  output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stintlap", y = "Lap time", variable = "Stint", nColumns = 1, colorVariable = "Driver", stripPos = "right", yRange = laptimes_range()))
+
   # Tyres and Brakes
-  output$subtab_tyres_avg_pres_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
-  output$subtab_tyres_avg_pres_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
+  output$subtab_tyres_avg_pres_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre pressure", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_pres_range))
+  output$subtab_tyres_avg_pres_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre pressure", nColumns = 2, yRange = input$subtab_tyres_avg_pres_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
   output$subtab_tyres_avg_temp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
   output$subtab_tyres_avg_temp_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
