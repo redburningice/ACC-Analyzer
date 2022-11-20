@@ -38,29 +38,43 @@ linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colo
     
     # add elements to the plot, if parameter is true
     if (hasStintSeperator == TRUE) {
+        pitlaps <- data %>% dplyr::filter(`In lap?` == "Yes") %>% pull(`Lap`)
         plot <- plot + geom_vline(xintercept = pitlaps)
     }
     
     return(plot)
 }
 
-facet <- function(data, x, variable, freeYAxis = FALSE, nColumns = 2) {
-    if (freeYAxis == TRUE) scaleOption <- "free_y" else scaleOption <- "fixed"
-    
-    data <- data %>% tidyr::pivot_longer(cols = starts_with(variable), names_to = "VariableName", values_to = variable)
-    
-    facet_wrap <- facet_wrap(vars(`VariableName`), scales = scaleOption, ncol = nColumns)
-        
-    return(facet_wrap)    
+
+# Facet Functions
+
+facet_pivot <- function(data, variable) {
+    data %>% tidyr::pivot_longer(cols = starts_with(variable), names_to = "VariableName", values_to = variable)
 }
 
-boxplot_facet <- function(data, x, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 2, nColumns = 2) {
+facet <- function(data, variable, freeYAxis = FALSE, nColumns = 2) {
     if (freeYAxis == TRUE) scaleOption <- "free_y" else scaleOption <- "fixed"
     
-    data <- data %>% tidyr::pivot_longer(cols = starts_with(variable), names_to = "Tyre", values_to = variable)
+    if ("VariableName" %in% colnames(data)) {
+        facet_wrap(vars(`VariableName`), scales = scaleOption, ncol = nColumns)
+    } else {
+        facet_wrap(vars(.data[[variable]], scales = scaleOption, ncol = nColumns))
+    }
     
-    boxplot(data, x, y = variable, yRange = yRange, hasLabel = hasLabel, decimalPlaces = decimalPlaces)+
-        facet_wrap(vars(`Tyre`), scales = scaleOption, ncol = nColumns)
+}
+
+boxplot_facet <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 2, nColumns = 2) {
+    data <- facet_pivot(data, variable)
+    
+    boxplot(data, x, y, yRange = yRange, hasLabel = hasLabel, decimalPlaces = decimalPlaces)+
+        facet(data, variable, freeYAxis, nColumns)
+}
+
+linegraph_facet <- function(data, x, y, variable, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, freeYAxis = FALSE, nColumns = 2) {
+    if (is.null(y)) data <- facet_pivot(data, variable)
+    
+    linegraph(data, x, y, yRange, hasStintSeperator, colorVariable)+
+        facet(data, variable, freeYAxis, nColumns)
 }
 
 

@@ -1,6 +1,5 @@
 pacman::p_load(shinydashboard, bslib, googlesheets4, shinythemes, ggplot2, highcharter, shiny, DT, tidyr, dplyr)
 source("GoogleSheetsAnalyzer.R")
-source("GenericPlots.R")
 defaultUrl <- "https://docs.google.com/spreadsheets/d/1XqUbDBPDTwRxQYsmTz2R0g07LAD0iQtyB50LQYl-vHU/edit#gid=1840826699"
 
 ui <- dashboardPage(
@@ -109,16 +108,13 @@ server <- function(input, output) {
   lap_data <- reactive(read_googlesheet(input$googleSheetsUrl, "lap_data"))
   stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
   event_info <- reactive(read_googlesheet(input$googleSheetsUrl, "Event info"))
-  laptimes_sorted_filtered <- reactive(lap_data() %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>% pull(`Lap time`) %>% sort())
 
   # Laptimes
   output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
-  output$subtab_laptimes_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Lap time", hasLabel = TRUE, yRange = c(laptimes_sorted_filtered()[1],laptimes_sorted_filtered()[length(laptimes_sorted_filtered())*0.98])))
+  output$subtab_laptimes_boxplot <- renderPlot(stint_overview_boxplot(lap_data()))
   output$subtab_laptimes_table <- DT::renderDataTable(stint_overview(), options = list(scrollX = TRUE))
-  #output$subtab_laptimes_linechart <- renderPlot(stint_overview_linechart(lap_data()))
-  #output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stint lap", y = "Lap time", variable = "Stint"))
-  output$subtab_laptimes_linechart <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Sector"))
-  
+  output$subtab_laptimes_linechart <- renderPlot(stint_overview_linechart(lap_data()))
+
   # Tyres and Brakes
   output$subtab_tyres_avg_pres_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
   output$subtab_tyres_avg_pres_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_pres_range, "pressure"))
