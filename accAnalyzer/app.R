@@ -122,11 +122,11 @@ server <- function(input, output) {
   output$subtab_tyres_avg_pres_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre pressure", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_pres_range))
   output$subtab_tyres_avg_pres_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre pressure", nColumns = 2, yRange = input$subtab_tyres_avg_pres_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
-  output$subtab_tyres_avg_temp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
-  output$subtab_tyres_avg_temp_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_temp_range, "temperature"))
+  output$subtab_tyres_avg_temp_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre temp", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_temp_range))
+  output$subtab_tyres_avg_temp_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre temp", nColumns = 2, yRange = input$subtab_tyres_avg_temp_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
-  output$subtab_tyres_avg_braketemp_boxplot <- renderPlot(tyres_boxplot(lap_data(), input$subtab_tyres_avg_braketemp_range, "braketemps"))
-  output$subtab_tyres_avg_braketemp_linechart <- renderPlot(tyres_linechart(lap_data(), input$subtab_tyres_avg_braketemp_range, "braketemps"))
+  output$subtab_tyres_avg_braketemp_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Brake avg temp", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_braketemp_range))
+  output$subtab_tyres_avg_braketemp_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Brake avg temp", nColumns = 2, yRange = input$subtab_tyres_avg_braketemp_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
   output$subtab_brakewear_boxplot <- renderPlot(tyres_boxplot(lap_data(), NA, "brakewear"))
   output$subtab_brakewear_linechart <- renderPlot(tyres_linechart(lap_data(), NA, "brakewear"))

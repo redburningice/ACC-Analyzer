@@ -83,6 +83,19 @@ linegraph_facet <- function(data, x, y, variable, yRange = NULL, hasStintSeperat
         facet(data, variable, freeYAxis, nColumns, stripPos = stripPos)
 }
 
+boxplot_facet_brakewear <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 4, nColumns = 2, stripPos = "top") {
+    plot <- boxplot_facet(data, x, y, variable, yRange, freeYAxis, hasLabel, decimalPlaces, nColumns, stripPos)
+    plot + stat_summary(
+        aes(label = round(..y.., decimalPlaces)), 
+        fun = brakewear_fun, 
+        geom = "label")
+    return(plot)
+}
+
+brakewear_fun <- function(y) {
+    mean(diff(y, differences = 1)*-1)
+}
+
 
 
 
