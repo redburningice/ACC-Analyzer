@@ -1,0 +1,14 @@
+name: accAnalyzer
+title: accAnalyzer
+username:
+account: redburningice
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7639039
+bundleId: 6564079
+url: https://redburningice.shinyapps.io/accanalyzer/
+when: 1669665019.90284
+lastSyncTime: 1669665019.90285
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: testing.R

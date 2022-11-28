@@ -64,10 +64,9 @@ motec_data_n[,20] %<>% as.numeric()
 
 # Lap Time vs Driver/Setup
 ggplot(motec_data_n, aes(`Driver/Setup `, `Lap Time `, fill = `Driver/Setup `)) +
-  # geom_text(aes(label = `Lap Time `), stat = )+
   geom_boxplot() +
   stat_summary(aes(label=round(..y..,2)), fun=median, geom="label", fill = "white")+
-  labs(title = )
+  labs(title = "Stint Overview")+
   theme_bw()
 
 # Lap Times over stint: linear regression
