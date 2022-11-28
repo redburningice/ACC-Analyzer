@@ -1,14 +1,23 @@
 pacman::p_load(googlesheets4, ggplot2, tidyr, dplyr, tibble, data.table, stringr)
 
-plot <- function(data, x, y, yRange = NULL) {
+source("SpecificPlots.R")
+
+plot <- function(data, x, y, yRange = NULL, yLabel = NULL) {
+    #data <- data %>% dplyr::filter(`Out lap?` == "No", `In lap?` == "No")
     
     # convert columns
     if (x == "Stint") data$`Stint` <- as.factor(data$`Stint`)
     
     # main plot
-    plot <- ggplot(data, aes(x = .data[[x]], y = .data[[y]]))+
-        theme_bw()+
-        labs(x = str_to_title(x), y = str_to_title(y))
+    if (!is.null(y)) {
+        plot <- ggplot(data, aes(x = .data[[x]], y = .data[[y]]))+
+            theme_bw()+
+            labs(x = str_to_title(x), y = yLabel)
+    } else {
+        plot <- ggplot(data, aes(x = .data[[x]]))+
+            theme_bw()+
+            labs(x = str_to_title(x))
+    }
     
     # add elements to the plot, if parameter is true
     if (!is.null(yRange)) plot <- plot + coord_cartesian(ylim = yRange)
@@ -16,9 +25,9 @@ plot <- function(data, x, y, yRange = NULL) {
     return(plot)
 }
 
-boxplot <- function(data, x, y, yRange = NULL, hasLabel = FALSE, decimalPlaces = 2) {
+boxplot <- function(data, x, y, yRange = NULL, hasLabel = FALSE, decimalPlaces = 2, yLabel = NULL) {
     
-    plot <- plot(data, x, y, yRange) + geom_boxplot(aes(fill = `Driver`))
+    plot <- plot(data, x, y, yRange, yLabel) + geom_boxplot(aes(fill = `Driver`))
     
     # add elements to the plot, if parameter is true
     if (hasLabel == TRUE) {
@@ -33,13 +42,13 @@ boxplot <- function(data, x, y, yRange = NULL, hasLabel = FALSE, decimalPlaces =
     return(plot)
 }
 
-linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL) {
-    plot <- plot(data, x, y, yRange) + geom_path(aes(group = 1, colour = if (!is.null(colorVariable)) .data[[colorVariable]]))
+linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, yLabel = NULL) {
+    plot <- plot(data, x, y, yRange, yLabel) + geom_path(aes(group = 1, colour = if (!is.null(colorVariable)) .data[[colorVariable]]))
     
     # add elements to the plot, if parameter is true
     if (hasStintSeperator == TRUE) {
-        pitlaps <- data %>% dplyr::filter(`In lap?` == "Yes") %>% pull(`Lap`)
-        plot <- plot + geom_vline(xintercept = pitlaps)
+        pitlaps <- data %>% dplyr::filter(`Out lap?` == "Yes") %>% pull(`Lap`)
+        plot <- plot + geom_vline(xintercept = pitlaps) + labs(colour = colorVariable)
     }
     
     return(plot)
@@ -63,37 +72,24 @@ facet <- function(data, variable, freeYAxis = FALSE, nColumns = 2, stripPos = "t
     
 }
 
-boxplot_facet <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 2, nColumns = 2, stripPos = "top") {
+boxplot_facet <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 2, nColumns = 2, stripPos = "top", yLabel = NULL) {
     if (is.null(y)) {
         data <- facet_pivot(data, variable)
         y <- variable
     }
     
-    boxplot(data, x, y, yRange = yRange, hasLabel = hasLabel, decimalPlaces = decimalPlaces)+
+    boxplot(data, x, y, yRange = yRange, hasLabel = hasLabel, decimalPlaces = decimalPlaces, yLabel = yLabel)+
         facet(data, variable, freeYAxis, nColumns, stripPos)
 }
 
-linegraph_facet <- function(data, x, y, variable, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, freeYAxis = FALSE, nColumns = 2, stripPos = "top") {
+linegraph_facet <- function(data, x, y, variable, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, freeYAxis = FALSE, nColumns = 2, stripPos = "top", yLabel = NULL) {
     if (is.null(y)) {
         data <- facet_pivot(data, variable)
         y <- variable
     }
     
-    linegraph(data, x, y, yRange, hasStintSeperator, colorVariable)+
+    linegraph(data, x, y, yRange, hasStintSeperator, colorVariable, yLabel = yLabel)+
         facet(data, variable, freeYAxis, nColumns, stripPos = stripPos)
-}
-
-boxplot_facet_brakewear <- function(data, x, y = NULL, variable, yRange = NULL, freeYAxis = FALSE, hasLabel = FALSE, decimalPlaces = 4, nColumns = 2, stripPos = "top") {
-    plot <- boxplot_facet(data, x, y, variable, yRange, freeYAxis, hasLabel, decimalPlaces, nColumns, stripPos)
-    plot + stat_summary(
-        aes(label = round(..y.., decimalPlaces)), 
-        fun = brakewear_fun, 
-        geom = "label")
-    return(plot)
-}
-
-brakewear_fun <- function(y) {
-    mean(diff(y, differences = 1)*-1)
 }
 
 

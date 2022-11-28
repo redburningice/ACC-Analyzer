@@ -84,7 +84,6 @@ ui <- dashboardPage(
             ),
             tabPanel(
               "Brake Wear",
-              sliderInput("subtab_brakewear_range", label = "Temperature Range [°C]", min = 100, max = 600, value = c(150, 300), step = 50, width = "50%"),
               plotOutput("subtab_brakewear_boxplot"),
               plotOutput("subtab_brakewear_linechart")
             )
@@ -114,33 +113,33 @@ server <- function(input, output) {
 
   # Laptimes
   output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
-  output$subtab_laptimes_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Lap time", hasLabel = TRUE, yRange = laptimes_range()))
+  output$subtab_laptimes_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Lap time", hasLabel = TRUE, yRange = laptimes_range(), yLabel = "Lap Time [s]"))
   output$subtab_laptimes_table <- DT::renderDataTable(stint_overview(), options = list(scrollX = TRUE))
-  output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stintlap", y = "Lap time", variable = "Stint", nColumns = 1, colorVariable = "Driver", stripPos = "right", yRange = laptimes_range()))
+  output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stintlap", y = "Lap time", variable = "Stint", nColumns = 1, colorVariable = "Driver", stripPos = "right", yRange = laptimes_range(), yLabel = "Lap Time [s]"))
 
   # Tyres and Brakes
-  output$subtab_tyres_avg_pres_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre pressure", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_pres_range))
-  output$subtab_tyres_avg_pres_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre pressure", nColumns = 2, yRange = input$subtab_tyres_avg_pres_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
+  output$subtab_tyres_avg_pres_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre pressure", yLabel = "AVG Tyre Pressure [PSI]", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_pres_range))
+  output$subtab_tyres_avg_pres_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre pressure",yLabel = "AVG Tyre Pressure [PSI]", nColumns = 2, yRange = input$subtab_tyres_avg_pres_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
-  output$subtab_tyres_avg_temp_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre temp", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_temp_range))
-  output$subtab_tyres_avg_temp_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre temp", nColumns = 2, yRange = input$subtab_tyres_avg_temp_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
+  output$subtab_tyres_avg_temp_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Avg tyre temp", hasLabel = TRUE, yLabel = "AVG Tyre Temperature [°C]", nColumns = 2, yRange = input$subtab_tyres_avg_temp_range))
+  output$subtab_tyres_avg_temp_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Avg tyre temp", nColumns = 2, yLabel = "AVG Tyre Temperature [°C]", yRange = input$subtab_tyres_avg_temp_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
-  output$subtab_tyres_avg_braketemp_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Brake avg temp", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_braketemp_range))
-  output$subtab_tyres_avg_braketemp_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Brake avg temp", nColumns = 2, yRange = input$subtab_tyres_avg_braketemp_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
+  output$subtab_tyres_avg_braketemp_boxplot <- renderPlot(boxplot_facet(lap_data(), x = "Stint", y = NULL, variable = "Brake avg temp", yLabel = "AVG Brake Temperature [°C]", hasLabel = TRUE, nColumns = 2, yRange = input$subtab_tyres_avg_braketemp_range))
+  output$subtab_tyres_avg_braketemp_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Brake avg temp", yLabel = "AVG Brake Temperature [°C]", nColumns = 2, yRange = input$subtab_tyres_avg_braketemp_range, hasStintSeperator = TRUE, colorVariable = "Driver"))
 
-  output$subtab_brakewear_boxplot <- renderPlot(tyres_boxplot(lap_data(), NA, "brakewear"))
-  output$subtab_brakewear_linechart <- renderPlot(tyres_linechart(lap_data(), NA, "brakewear"))
-  
-  # Drive Time
+  output$subtab_brakewear_boxplot <- renderPlot(brakewear_boxplot(lap_data(), x = "Stint", y = NULL, variable = "Brake pad level", yLabel = "Brake Pad Wear per Lap [mm]", hasLabel = TRUE, nColumns = 2))
+  output$subtab_brakewear_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Brake pad level", yLabel = "Brake Pad Level [mm]", nColumns = 2, hasStintSeperator = TRUE, colorVariable = "Driver"))
   
   # Fuel
-  output$subtab_fuel_boxplot <- renderPlot(fuel_boxplot(lap_data()))
-  output$subtab_fuel_linechart <- renderPlot(fuel_linechart(lap_data()))
+  output$subtab_fuel_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", hasLabel = TRUE))
+  output$subtab_fuel_linechart <- renderPlot(linegraph(lap_data(), x = "Lap", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", colorVariable = "Driver", hasStintSeperator = TRUE))
   
   # Weather
-  output$subtab_weather_linechart <- renderPlot(weather_linechart(lap_data()))
+  output$subtab_weather_linechart <- renderPlot(weather_linegraph(lap_data(), x = "Lap", y = NULL, yLabel = "Temperature [°C]"))
   
   # Pitstops
+  
+  # Drive Time
   
 }
 
