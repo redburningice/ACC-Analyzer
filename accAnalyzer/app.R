@@ -1,7 +1,7 @@
 pacman::p_load(shinydashboard, bslib, googlesheets4, shinythemes, ggplot2, highcharter, shiny, DT, tidyr, dplyr)
 source("GoogleSheetsAnalyzer.R")
 source("GenericPlots.R")
-defaultUrl <- "https://docs.google.com/spreadsheets/d/1XqUbDBPDTwRxQYsmTz2R0g07LAD0iQtyB50LQYl-vHU/edit#gid=1840826699"
+defaultUrl <- "https://docs.google.com/spreadsheets/d/1Ey2Zzh1tQSUmUNthjTydjWiRf1EtNA2dyV273UKY6Jo/edit#gid=1474571985"
 
 ui <- dashboardPage(
   title = "NoP - Not only Plots",
@@ -10,16 +10,17 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = "sidebar",
-      menuItem("Imports", tabName = "imports"),
-      menuItem("Google Sheets Analyzer",
-        tabName = "google-sheets-analyzer",
-        menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = F),
-        menuSubItem("Tyres and Brakes", tabName = "subtab-tyres", selected = T),
-        menuSubItem("Fuel", tabName = "subtab_fuel"),
-        menuSubItem("Pitstops [not implemented]", tabName = "subtab_pitstops"),
-        menuSubItem("Drive Time [not implemented]", tabName = "subtab_drivetime"),
-        menuSubItem("Weather", tabName = "subtab_weather")
-      ),
+      menuItem("Imports", tabName = "imports", selected = F),
+      # menuItem("Google Sheets Analyzer",
+      #   tabName = "google-sheets-analyzer"
+      # ),
+      menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = T),
+      menuSubItem("Tyres and Brakes", tabName = "subtab-tyres"),
+      menuSubItem("Fuel", tabName = "subtab_fuel"),
+      menuSubItem("Pitstops [not implemented]", tabName = "subtab_pitstops"),
+      menuSubItem("Drive Time [not implemented]", tabName = "subtab_drivetime"),
+      menuSubItem("Weather", tabName = "subtab_weather"),
+      
       menuItem("Motec Lap History Analyzer [not implemented]",
         tabName = "motec-lap-analyzer",
         menuSubItem("Lap Time Overview", tabName = "motec-lap-laptime"),
@@ -72,7 +73,7 @@ ui <- dashboardPage(
             ),
             tabPanel(
               "Temperatures",
-              sliderInput("subtab_tyres_avg_temp_range", label = "Temperature Range [°C]", min = 40, max = 120, value = c(80, 100), step = 5, width = "50%"),
+              sliderInput("subtab_tyres_avg_temp_range", label = "Temperature Range [°C]", min = 20, max = 120, value = c(80, 100), step = 5, width = "50%"),
               plotOutput("subtab_tyres_avg_temp_boxplot"),
               plotOutput("subtab_tyres_avg_temp_linechart")
             ),
@@ -98,7 +99,15 @@ ui <- dashboardPage(
       tabItem(
           tabName = "subtab_weather",
           h2("Temperature History"),
-          fluidRow(plotOutput("subtab_weather_linechart"))
+          fluidRow(plotOutput("subtab_weather_temperature")),
+          br(),
+          h2("Weather History"),
+          fluidRow(plotOutput("subtab_weather_history")),
+          br(),
+          h2("Track State History"),
+          fluidRow(plotOutput("subtab_trackstate_history")),
+          br(), br(),
+          fluidRow(DT::dataTableOutput("subtab_weather_table"))
       )
     )
   )
@@ -108,6 +117,8 @@ server <- function(input, output) {
   lap_data <- reactive(read_googlesheet(input$googleSheetsUrl, "lap_data"))
   stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
   event_info <- reactive(read_googlesheet(input$googleSheetsUrl, "Event info"))
+  weather_data <- reactive(read_googlesheet(input$googleSheetsUrl, "weather_data"))
+  
   laptimes_sorted_filtered <- reactive(lap_data() %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>% pull(`Lap time`) %>% sort())
   laptimes_range <- reactive(c(laptimes_sorted_filtered()[1],laptimes_sorted_filtered()[length(laptimes_sorted_filtered())*0.98]))
 
@@ -131,11 +142,14 @@ server <- function(input, output) {
   output$subtab_brakewear_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Lap", y = NULL, variable = "Brake pad level", yLabel = "Brake Pad Level [mm]", nColumns = 2, hasStintSeperator = TRUE, colorVariable = "Driver"))
   
   # Fuel
-  output$subtab_fuel_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", hasLabel = TRUE))
-  output$subtab_fuel_linechart <- renderPlot(linegraph(lap_data(), x = "Lap", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", colorVariable = "Driver", hasStintSeperator = TRUE))
+  output$subtab_fuel_boxplot <- renderPlot(fuel_boxplot(lap_data(), x = "Stint", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", hasLabel = TRUE))
+  output$subtab_fuel_linechart <- renderPlot(fuel_linegraph(lap_data(), x = "Lap", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", colorVariable = "Driver", hasStintSeperator = TRUE))
   
   # Weather
-  output$subtab_weather_linechart <- renderPlot(weather_linegraph(lap_data(), x = "Lap", y = NULL, yLabel = "Temperature [°C]"))
+  output$subtab_weather_temperature <- renderPlot(temperature_linegraph(weather_data(), x = "Race Time", y = NULL, yLabel = "Temperature [°C]"))
+  output$subtab_weather_history <- renderPlot(weather_graph(weather_data(), x = "Race Time", y = NULL, yLabel = "Weather State"))
+  output$subtab_trackstate_history <- renderPlot(trackstate_graph(weather_data(), x = "Race Time", y = NULL, yLabel = "Track State"))
+  output$subtab_weather_table <- DT::renderDataTable(weather_data(), options = list(scrollX = TRUE))
   
   # Pitstops
   
