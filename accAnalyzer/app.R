@@ -43,6 +43,7 @@ ui <- dashboardPage(
           column(
             width = 12,
             textInput(inputId = "googleSheetsUrl", label = "Enter the Google Sheets URL:", value = defaultUrl),
+            textInput(inputId = "googleSheetsStratSheet", label = "Enter the Name of the current Stratsheet:", value = "Strat plan (map1)")
           )
         )
       ),
@@ -118,6 +119,8 @@ server <- function(input, output) {
   stint_overview <- reactive(read_googlesheet(input$googleSheetsUrl, "Stint overview"))
   event_info <- reactive(read_googlesheet(input$googleSheetsUrl, "Event info"))
   weather_data <- reactive(read_googlesheet(input$googleSheetsUrl, "weather_data"))
+  targetFuelConsumption <- reactive(stratplan <- read_googlesheet(input$googleSheetsUrl, input$googleSheetsStratSheet),
+                                    stratplan$`Target fuel consumption`[2])
   
   laptimes_sorted_filtered <- reactive(lap_data() %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No") %>% pull(`Lap time`) %>% sort())
   laptimes_range <- reactive(c(laptimes_sorted_filtered()[1],laptimes_sorted_filtered()[length(laptimes_sorted_filtered())*0.98]))
@@ -143,7 +146,7 @@ server <- function(input, output) {
   
   # Fuel
   output$subtab_fuel_boxplot <- renderPlot(fuel_boxplot(lap_data(), x = "Stint", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", hasLabel = TRUE))
-  output$subtab_fuel_linechart <- renderPlot(fuel_linegraph(lap_data(), x = "Lap", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", colorVariable = "Driver", hasStintSeperator = TRUE))
+  output$subtab_fuel_linechart <- renderPlot(fuel_linegraph(lap_data(), x = "Lap", y = "Fuel consumption avg", yLabel = "Fuel Consumption [l/lap]", colorVariable = "Driver", hasStintSeperator = TRUE, targetFuelConsumption = targetFuelConsumption()))
   
   # Weather
   output$subtab_weather_temperature <- renderPlot(temperature_linegraph(weather_data(), x = "Race Time", y = NULL, yLabel = "Temperature [°C]"))
