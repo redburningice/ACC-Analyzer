@@ -63,8 +63,9 @@ fuel_boxplot <- function(data, x, y, yRange = NULL, hasLabel = FALSE, decimalPla
     boxplot(data, x, y, yRange, hasLabel, decimalPlaces, yLabel)
 }
 
-fuel_linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, yLabel = NULL, targetFuelConsumption) {
+fuel_linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, yLabel = NULL, targetFuelConsumption = 3.8) {
     data <- data %>% dplyr::filter(`Out lap?` == "No", `Lap` != 1, `In lap?` == "No")
     linegraph(data, x, y, yRange, hasStintSeperator, colorVariable, yLabel)+
-        geom_line(aes(y = targetFuelConsumption, colour = "Target Fuel Consumption"))
+        geom_hline(aes(yintercept = targetFuelConsumption, colour = "Target Fuel Consumption"))+
+        geom_label(aes(y = targetFuelConsumption, x = 0, label = targetFuelConsumption, colour = "Target Fuel Consumption"))
 }

@@ -70,6 +70,10 @@ read_googlesheet <- function(url, sheetname) {
   return(data)
 }
 
+read_googlesheet_range <- function(url, sheetname, range) {
+    googlesheets4::read_sheet(ss = url, sheet = sheetname, range = range)
+}
+
 google_plot <- function(data) {
   ggplot(data, aes(x = `Lap time`, fill = `Driver`)) +
     geom_boxplot() +
