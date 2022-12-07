@@ -47,7 +47,20 @@ linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colo
     
     # add elements to the plot, if parameter is true
     if (hasStintSeperator == TRUE) {
-        pitlaps <- data %>% dplyr::filter(`Out lap?` == "Yes") %>% pull(`Lap`)
+        
+        # old way of getting the stint seperator line
+        # pitlaps <- data %>% dplyr::filter(`Out lap?` == "Yes") %>% pull(`Lap`)
+        pitlaps <- vector(mode="numeric", length=max(max(data$`Stint`))-1)
+        for (stintNr in 1:max(data$`Stint`)) {
+            for (i in 1:nrow(data)) {
+                if (data$`Stint`[i] == stintNr) {
+                    pitlaps[stintNr] <- data$`Lap`[i] 
+                    break
+                }
+                
+            }
+        }
+        pitlaps <- pitlaps[-1]
         plot <- plot + geom_vline(xintercept = pitlaps) + labs(colour = colorVariable)
     }
     

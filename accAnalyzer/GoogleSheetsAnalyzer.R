@@ -44,10 +44,7 @@ read_googlesheet <- function(url, sheetname) {
       
       data$Stint[i] <- data$Stint[i - 1] + next_stint
     }
-  }
-
-  # Sheet = Stint Overview
-  if (sheetname == "Stint overview") {
+  } else if (sheetname == "Stint overview") {
     data <- googlesheets4::read_sheet(url, sheet = sheetname, skip = 1)
     data <- na.omit(data)
     data <- data[-c(5, 7:12, 15:30)]
@@ -56,10 +53,25 @@ read_googlesheet <- function(url, sheetname) {
       "Outlap" = "Outlap...2",
       "Inlap" = "Inlap...3"
     )
+  } else if (sheetname == "weather_data") {
+      data <- googlesheets4::read_sheet(url, sheet = sheetname)
+      data <- data %>% 
+          dplyr::arrange(-dplyr::row_number()) %>% 
+          mutate(hour = `Ingame clock (raw value)` / 3600) %>% 
+          mutate("Race Time" = `Ingame clock (raw value)` / 3600 - `hour`[1])
+      for(i in 1:nrow(data)) {
+          if(data$`Race Time`[i] < 0) data$`Race Time`[i] <- data$`Race Time`[i] + 24
+      }
+      
+  } else {
+      data <- googlesheets4::read_sheet(url, sheet = sheetname)
   }
-
-
+    
   return(data)
+}
+
+read_googlesheet_range <- function(url, sheetname, range) {
+    googlesheets4::read_sheet(ss = url, sheet = sheetname, range = range)
 }
 
 google_plot <- function(data) {
