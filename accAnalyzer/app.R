@@ -139,8 +139,9 @@ server <- function(input, output) {
   output$tableGoogle <- DT::renderDataTable(lap_data(), options = list(scrollX = TRUE))
   output$subtab_laptimes_boxplot <- renderPlot(boxplot(lap_data(), x = "Stint", y = "Lap time", hasLabel = TRUE, yRange = laptimes_range(), yLabel = "Lap Time [s]"))
   output$subtab_laptimes_table <- DT::renderDataTable(stint_overview(), options = list(scrollX = TRUE))
-  output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stintlap", y = "Lap time", variable = "Stint", nColumns = 1, colorVariable = "Driver", stripPos = "right", yRange = laptimes_range(), yLabel = "Lap Time [s]"))
-
+  #output$subtab_laptimes_linechart <- renderPlot(linegraph_facet(lap_data(), x = "Stintlap", y = "Lap time", variable = "Stint", nColumns = 1, colorVariable = "Driver", stripPos = "right", yRange = laptimes_range(), yLabel = "Lap Time [s]", hasStintSeperator = FALSE))
+  output$subtab_laptimes_linechart <- renderPlot(linegraph(lap_data(), x = "Lap", y = "Lap time", colorVariable = "Driver", yRange = laptimes_range(), yLabel = "Lap Time [s]", hasStintSeperator = TRUE))
+  
   # Tyres and Brakes
   range1 <- reactive(
     if (is.null(input$subtab_tyres_avg_pres_overwrite)) {
