@@ -43,7 +43,8 @@ boxplot <- function(data, x, y, yRange = NULL, hasLabel = FALSE, decimalPlaces =
 }
 
 linegraph <- function(data, x, y, yRange = NULL, hasStintSeperator = FALSE, colorVariable = NULL, yLabel = NULL) {
-    plot <- plot(data, x, y, yRange, yLabel) + geom_path(aes(group = 1, colour = if (!is.null(colorVariable)) .data[[colorVariable]]))
+    plot <- plot(data, x, y, yRange, yLabel) + geom_path(aes(group = 1, colour = if (!is.null(colorVariable)) .data[[colorVariable]]))+
+        labs(colour=colorVariable)
     
     # add elements to the plot, if parameter is true
     if (hasStintSeperator == TRUE) {
