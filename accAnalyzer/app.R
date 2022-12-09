@@ -10,42 +10,31 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = "sidebar",
-      menuItem("Imports", tabName = "imports", selected = F),
-      # menuItem("Google Sheets Analyzer",
-      #   tabName = "google-sheets-analyzer"
-      # ),
+      textInput(inputId = "googleSheetsUrl", label = "Enter the Google Sheets URL:", value = defaultUrl),
+      textInput(inputId = "googleSheetsStratSheet", label = "Enter the Name of the current Stratsheet:", value = "Strat plan (map1)"),
+      
       menuSubItem("Lap Times", tabName = "subtab-laptimes", selected = T),
       menuSubItem("Tyres and Brakes", tabName = "subtab-tyres"),
       menuSubItem("Fuel", tabName = "subtab_fuel"),
       menuSubItem("Pitstops [not implemented]", tabName = "subtab_pitstops"),
       menuSubItem("Drive Time [not implemented]", tabName = "subtab_drivetime"),
-      menuSubItem("Weather", tabName = "subtab_weather"),
-      menuItem("Motec Lap History Analyzer [not implemented]",
-        tabName = "motec-lap-analyzer",
-        menuSubItem("Lap Time Overview", tabName = "motec-lap-laptime"),
-        menuSubItem("Understeer Analysis", tabName = "motec-lap-understeer")
-      ),
-      menuItem("Motec Section History Analyzer [not implemented]",
-        tabName = "motec-section-analyzer",
-        menuSubItem("Braking Analysis", tabName = "motec-section-braking"),
-        menuSubItem("Detailled Section Analysis", tabName = "motec-section-braking-detailled"),
-        menuSubItem("Understeer Analysis", tabName = "motec-section-understeer"),
-        menuSubItem("Error Corrected Laptime", tabName = "motec-section-error-correction")
-      )
+      menuSubItem("Weather", tabName = "subtab_weather")
+      # menuItem("Motec Lap History Analyzer [not implemented]",
+      #   tabName = "motec-lap-analyzer",
+      #   menuSubItem("Lap Time Overview", tabName = "motec-lap-laptime"),
+      #   menuSubItem("Understeer Analysis", tabName = "motec-lap-understeer")
+      # ),
+      # menuItem("Motec Section History Analyzer [not implemented]",
+      #   tabName = "motec-section-analyzer",
+      #   menuSubItem("Braking Analysis", tabName = "motec-section-braking"),
+      #   menuSubItem("Detailled Section Analysis", tabName = "motec-section-braking-detailled"),
+      #   menuSubItem("Understeer Analysis", tabName = "motec-section-understeer"),
+      #   menuSubItem("Error Corrected Laptime", tabName = "motec-section-error-correction")
+      # )
     )
   ),
   dashboardBody(
     tabItems(
-      tabItem(
-        tabName = "imports",
-        fluidRow(
-          column(
-            width = 12,
-            textInput(inputId = "googleSheetsUrl", label = "Enter the Google Sheets URL:", value = defaultUrl),
-            textInput(inputId = "googleSheetsStratSheet", label = "Enter the Name of the current Stratsheet:", value = "Strat plan (map1)")
-          )
-        )
-      ),
       tabItem(
         tabName = "subtab-laptimes",
         fluidRow(
